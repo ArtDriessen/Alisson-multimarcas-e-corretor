@@ -1,0 +1,5 @@
+# Dados do estoque ficam fora do Git (e fora da pasta pública, no servidor)
+storage/
+ao-dados/
+*.tmp
+_*test*.html

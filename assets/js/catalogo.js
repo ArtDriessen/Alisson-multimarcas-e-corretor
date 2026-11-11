@@ -4,7 +4,7 @@
   if (!root) return;
 
   var tipo = root.getAttribute('data-catalogo'); // 'veiculos' | 'imoveis'
-  var itens = (window.CATALOGO && window.CATALOGO[tipo]) || [];
+  var itens = [];
   var lista = document.getElementById('lista');
   var q = document.getElementById('f-busca');
   var ordem = document.getElementById('f-ordem');
@@ -31,7 +31,9 @@
   }
 
   function midia(it) {
-    var badge = it.exemplo ? '<span class="badge">Exemplo</span>' : (it.finalidade === 'Aluguel' ? '<span class="badge">Aluguel</span>' : '');
+    var badge = it.exemplo ? '<span class="badge">Exemplo</span>'
+      : (it.status === 'reservado' ? '<span class="badge">Reservado</span>'
+      : (it.finalidade === 'Aluguel' ? '<span class="badge">Aluguel</span>' : ''));
     if (it.fotos && it.fotos.length) {
       var imgs = it.fotos.map(function (f, i) {
         return '<img src="' + esc(f) + '" alt="' + esc(titulo(it)) + ' — foto ' + (i + 1) + '" loading="lazy">';
@@ -72,7 +74,7 @@
       ? '<a class="btn" href="financiamento.html?tipo=' + (tipo === 'veiculos' ? 'veiculo' : 'imovel') + '&valor=' + encodeURIComponent(it.preco) + '">Simular</a>'
       : '<span></span>';
     return '<article class="card">' + midia(it) +
-      '<div class="card-body"><h3>' + esc(nome) + '</h3>' + sub + specs(it) + '<p class="price metal">' + preco + '</p></div>' +
+      '<div class="card-body"><h3>' + esc(nome) + '</h3>' + sub + specs(it) + (it.descricao ? '<p class="sub desc">' + esc(it.descricao) + '</p>' : '') + '<p class="price metal">' + preco + '</p></div>' +
       '<div class="card-actions"><a class="btn btn-primary" href="' + waLink(msg) + '" target="_blank" rel="noopener">' + WA + 'Tenho interesse</a>' + simular + '</div>' +
       '</article>';
   }
@@ -102,7 +104,8 @@
       : '<div class="empty">Nenhum resultado com esses filtros.<br>Me chame no WhatsApp — posso procurar para você!</div>';
   }
 
-  if (cat) {
+  function montarFiltros() {
+    if (!cat) return;
     var tipos = Array.from(new Set(itens.map(function (i) { return i.tipo; }))).sort();
     cat.innerHTML = '<option value="">Todos</option>' + tipos.map(function (t) { return '<option>' + esc(t) + '</option>'; }).join('');
   }
@@ -117,5 +120,11 @@
     strip.scrollBy({ left: (b.classList.contains('next') ? 1 : -1) * strip.clientWidth, behavior: 'smooth' });
   });
 
-  aplicar();
+  function usar(lista) { itens = lista || []; montarFiltros(); aplicar(); }
+
+  lista.innerHTML = '<div class="empty">Carregando…</div>';
+  fetch('api/catalogo.php', { cache: 'no-cache' })
+    .then(function (r) { if (!r.ok) throw new Error('sem-dados'); return r.json(); })
+    .then(function (d) { usar(d[tipo]); })
+    .catch(function () { usar((window.CATALOGO && window.CATALOGO[tipo]) || []); }); // exemplos
 })();

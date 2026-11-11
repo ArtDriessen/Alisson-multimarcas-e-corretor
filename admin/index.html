@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0a0a0b">
+  <title>Painel | Alisson Orçatto</title>
+  <link rel="icon" type="image/png" href="../assets/img/favicon.png">
+  <link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;1,600;1,700;1,800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body class="adm">
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <!-- ===== Carregando ===== -->
+  <main id="v-load" class="solo"><p class="muted">Carregando…</p></main>
+
+  <!-- ===== Login ===== -->
+  <main id="v-login" class="solo" hidden>
+    <form class="box" id="f-login" autocomplete="on">
+      <img class="logo-mini" src="../assets/img/ao.png" alt="AO">
+      <h1 class="metal">Painel do Alisson</h1>
+      <p class="muted">Entre para cadastrar veículos e imóveis.</p>
+      <label for="login-senha">Senha</label>
+      <input class="field" id="login-senha" type="password" autocomplete="current-password" required>
+      <p class="erro" id="login-erro" hidden></p>
+      <button class="btn btn-primary btn-block" type="submit">Entrar</button>
+      <a class="voltar" href="../">← Voltar ao site</a>
+    </form>
+  </main>
+
+  <!-- ===== Trocar senha (obrigatória no 1º acesso) ===== -->
+  <main id="v-senha" class="solo" hidden>
+    <form class="box" id="f-senha" autocomplete="off">
+      <h1 class="metal" id="senha-titulo">Crie sua senha</h1>
+      <p class="muted" id="senha-sub">Por segurança, troque a senha inicial por uma só sua (mínimo de 8 caracteres).</p>
+      <label for="senha-atual">Senha atual</label>
+      <input class="field" id="senha-atual" type="password" autocomplete="current-password" required>
+      <label for="senha-nova">Nova senha</label>
+      <input class="field" id="senha-nova" type="password" autocomplete="new-password" minlength="8" required>
+      <label for="senha-nova2">Repita a nova senha</label>
+      <input class="field" id="senha-nova2" type="password" autocomplete="new-password" minlength="8" required>
+      <p class="erro" id="senha-erro" hidden></p>
+      <button class="btn btn-primary btn-block" type="submit">Salvar senha</button>
+      <button class="btn btn-block" type="button" id="senha-cancelar" hidden>Cancelar</button>
+    </form>
+  </main>
+
+  <!-- ===== Painel ===== -->
+  <div id="v-app" hidden>
+    <header class="topbar">
+      <div class="topbar-in">
+        <a class="brand" href="./" aria-label="Painel"><img src="../assets/img/ao.png" alt="AO"><span>Painel</span></a>
+        <nav class="nav" aria-label="Painel">
+          <a href="../" target="_blank" rel="noopener">Ver site ↗</a>
+          <a href="#" id="b-menu" role="button" aria-haspopup="true">Conta ▾</a>
+        </nav>
+      </div>
+      <div id="menu" class="menu" hidden>
+        <button type="button" id="m-senha">Trocar senha</button>
+        <a href="api.php?action=backup" id="m-backup">Baixar backup do estoque</a>
+        <button type="button" id="m-sair">Sair</button>
+      </div>
+    </header>
+
+    <main class="page">
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" type="button" data-tipo="veiculos" aria-selected="true">Veículos <span class="count" id="n-veiculos"></span></button>
+        <button class="tab" role="tab" type="button" data-tipo="imoveis" aria-selected="false">Imóveis <span class="count" id="n-imoveis"></span></button>
+      </div>
+
+      <div class="bar">
+        <h1 class="metal" id="lista-titulo">Veículos</h1>
+        <button class="btn btn-primary" type="button" id="b-novo">+ Novo</button>
+      </div>
+
+      <div id="aviso-exemplo" class="note" hidden>
+        O site está mostrando itens de <strong>exemplo</strong>. Assim que você cadastrar o primeiro item aqui, eles somem e o site passa a mostrar só o seu estoque.
+      </div>
+
+      <div id="lista" class="rows" aria-live="polite"></div>
+    </main>
+  </div>
+
+  <!-- ===== Formulário (cadastrar / editar) ===== -->
+  <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-titulo" hidden>
+    <form id="f-item" class="sheet" novalidate>
+      <div class="sheet-head">
+        <h2 id="modal-titulo" class="metal">Novo veículo</h2>
+        <button type="button" class="x" id="b-fechar" aria-label="Fechar">✕</button>
+      </div>
+
+      <div class="sheet-body">
+        <div class="row">
+          <span class="lbl">Fotos <span class="hint">(a primeira é a capa; até 12)</span></span>
+          <div id="fotos" class="fotos"></div>
+          <input id="in-fotos" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden>
+        </div>
+
+        <div id="campos"></div>
+
+        <div class="row">
+          <label for="c-descricao">Observações <span class="hint">(opcional)</span></label>
+          <textarea class="field" id="c-descricao" rows="3" maxlength="1500" placeholder="Ex.: único dono, revisões em dia, aceita troca…"></textarea>
+        </div>
+
+        <div class="row">
+          <label for="c-status">Situação</label>
+          <select class="field" id="c-status"></select>
+          <p class="hint">“Reservado” continua no site com uma etiqueta. “Vendido” some do site, mas fica aqui no painel.</p>
+        </div>
+
+        <p class="erro" id="item-erro" hidden></p>
+      </div>
+
+      <div class="sheet-foot">
+        <button type="button" class="btn danger" id="b-excluir" hidden>Excluir</button>
+        <span class="grow"></span>
+        <button type="button" class="btn" id="b-cancelar">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="b-salvar">Salvar</button>
+      </div>
+    </form>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>

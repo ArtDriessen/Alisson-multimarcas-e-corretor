@@ -1,0 +1,6 @@
+# Arquivos internos do painel nunca são servidos pelo navegador
+<FilesMatch "^_.*\.php$">
+  Require all denied
+</FilesMatch>
+Options -Indexes
+Header set X-Robots-Tag "noindex, nofollow"

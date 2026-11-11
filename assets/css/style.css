@@ -384,3 +384,5 @@ main.page { max-width: var(--maxw); margin: 0 auto; padding: 34px 18px 130px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
 }
+
+.card-body .desc { margin-top: 10px; font-size: .8rem; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
