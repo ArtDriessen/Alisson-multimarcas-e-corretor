@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Veículos | Alisson Orçatto</title>
+  <meta name="description" content="Catálogo de veículos do corretor automotivo Alisson Orçatto. Escolha, simule o financiamento e fale direto pelo WhatsApp.">
+  <meta name="theme-color" content="#0a0a0b">
+  <link rel="icon" type="image/png" href="assets/img/favicon.png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;1,600;1,700;1,800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-in">
+      <a class="brand" href="./" aria-label="Início"><img src="assets/img/ao.png" alt="AO"><span>Alisson Orçatto</span></a>
+      <nav class="nav" aria-label="Principal">
+        <a href="./">Início</a>
+        <a href="veiculos.html" aria-current="page">Veículos</a>
+        <a href="imoveis.html">Imóveis</a>
+        <a href="financiamento.html">Simulador</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page" data-catalogo="veiculos">
+    <div class="page-head">
+      <h1 class="metal">Veículos</h1>
+      <p>Escolha o seu, simule o financiamento e fale direto comigo pelo WhatsApp.</p>
+    </div>
+
+    <div class="filters">
+      <label>Buscar
+        <input id="f-busca" type="search" placeholder="Marca, modelo, ano, cor…" autocomplete="off">
+      </label>
+      <label>Ordenar por
+        <select id="f-ordem">
+          <option value="">Padrão</option>
+          <option value="menor">Menor preço</option>
+          <option value="maior">Maior preço</option>
+          <option value="novo">Mais novos</option>
+        </select>
+      </label>
+    </div>
+
+    <div id="lista" class="grid" aria-live="polite"></div>
+
+    <p class="aviso">Preços e disponibilidade sujeitos a alteração sem aviso prévio. Fotos meramente ilustrativas.</p>
+  </main>
+
+  <footer class="footer">
+    <p><a data-wa href="#">WhatsApp <span data-wa-num></span></a> · <a data-ig data-ig-text href="#">Instagram</a></p>
+    <p data-creci></p>
+    <p>© <span data-year>2026</span> Alisson Orçatto · Corretor automotivo e imobiliário</p>
+  </footer>
+
+  <script src="assets/js/config.js"></script>
+  <script src="data/catalogo.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/catalogo.js"></script>
+</body>
+</html>

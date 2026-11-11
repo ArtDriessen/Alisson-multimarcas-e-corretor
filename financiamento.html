@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Simulador de financiamento | Alisson Orçatto</title>
+  <meta name="description" content="Simule o financiamento do seu veículo ou imóvel: parcela, juros e total pago. Estimativa rápida e envio direto pelo WhatsApp.">
+  <meta name="theme-color" content="#0a0a0b">
+  <link rel="icon" type="image/png" href="assets/img/favicon.png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;1,600;1,700;1,800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-in">
+      <a class="brand" href="./" aria-label="Início"><img src="assets/img/ao.png" alt="AO"><span>Alisson Orçatto</span></a>
+      <nav class="nav" aria-label="Principal">
+        <a href="./">Início</a>
+        <a href="veiculos.html">Veículos</a>
+        <a href="imoveis.html">Imóveis</a>
+        <a href="financiamento.html" aria-current="page">Simulador</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="page-head">
+      <h1 class="metal">Simule seu financiamento</h1>
+      <p>Veja uma estimativa da parcela em segundos. Depois é só me enviar a simulação e eu busco a melhor condição para você.</p>
+    </div>
+
+    <div class="sim">
+      <section class="panel" aria-label="Dados da simulação">
+        <div class="tabs" role="tablist">
+          <button class="tab" role="tab" type="button" data-modo="veiculo" aria-selected="true">Veículo</button>
+          <button class="tab" role="tab" type="button" data-modo="imovel" aria-selected="false">Imóvel</button>
+        </div>
+
+        <div class="form">
+          <div class="row">
+            <label for="valor">Valor do bem</label>
+            <div class="money"><span>R$</span><input class="field" id="valor" type="text" inputmode="numeric" autocomplete="off"></div>
+          </div>
+
+          <div class="row">
+            <label for="entrada">Entrada</label>
+            <div class="money"><span>R$</span><input class="field" id="entrada" type="text" inputmode="numeric" autocomplete="off"></div>
+            <div class="chips" id="chips"></div>
+          </div>
+
+          <div class="two">
+            <div class="row">
+              <label for="prazo">Prazo</label>
+              <select class="field" id="prazo"></select>
+            </div>
+            <div class="row">
+              <label for="taxa">Juros ao mês (%)</label>
+              <input class="field" id="taxa" type="text" inputmode="decimal" autocomplete="off">
+            </div>
+          </div>
+          <p class="hint">A taxa é uma estimativa. A real depende do banco, do seu perfil e da análise de crédito.</p>
+
+          <div class="row" id="sec-sistema" hidden>
+            <span class="lbl">Sistema de amortização</span>
+            <div class="seg">
+              <label><input type="radio" name="sistema" value="price" checked><span>Price (parcela fixa)</span></label>
+              <label><input type="radio" name="sistema" value="sac"><span>SAC (parcela decrescente)</span></label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel result" aria-label="Resultado" aria-live="polite">
+        <div id="erro" class="erro" hidden></div>
+        <div id="saida">
+          <div class="big">
+            <div class="k" id="r-rotulo">Parcela mensal</div>
+            <div class="v metal" id="r-parcela">—</div>
+            <div class="n" id="r-nota"></div>
+          </div>
+          <ul class="kv">
+            <li><span>Entrada</span><span id="r-entrada">—</span></li>
+            <li><span>Valor financiado</span><span id="r-financiado">—</span></li>
+            <li><span>Total de juros</span><span id="r-juros">—</span></li>
+            <li><span>Total pago (com entrada)</span><span id="r-total">—</span></li>
+          </ul>
+          <a class="btn btn-primary btn-block" id="enviar" href="#" target="_blank" rel="noopener">Enviar esta simulação no WhatsApp</a>
+        </div>
+        <p class="aviso">Simulação meramente informativa, sem valor contratual. Não inclui seguros, tarifas, IOF nem custos de cartório. Aprovação sujeita a análise de crédito.</p>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p><a data-wa href="#">WhatsApp <span data-wa-num></span></a> · <a data-ig data-ig-text href="#">Instagram</a></p>
+    <p data-creci></p>
+    <p>© <span data-year>2026</span> Alisson Orçatto · Corretor automotivo e imobiliário</p>
+  </footer>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/financiamento.js"></script>
+</body>
+</html>
