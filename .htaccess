@@ -1,8 +1,8 @@
 # Faz o navegador e o CDN conferirem com o servidor antes de reutilizar páginas,
-# scripts e estilos. Sem isso, uma atualização do site pode demorar a aparecer
+# scripts e estilos (os .php definem o próprio cabeçalho). Sem isso, uma atualização do site pode demorar a aparecer
 # para quem já tinha visitado antes (o arquivo é só revalidado, então continua rápido).
 <IfModule mod_headers.c>
-  <FilesMatch "\.(html|js|css|php)$">
+  <FilesMatch "\.(html|js|css)$">
     Header set Cache-Control "no-cache, must-revalidate"
   </FilesMatch>
 </IfModule>
