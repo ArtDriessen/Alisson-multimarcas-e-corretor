@@ -20,7 +20,7 @@ Endereço: `https://SEU-SITE/admin/`. Pelo celular ou computador o Alisson entra
 
 - cadastra, edita e exclui **veículos** e **imóveis**, com até 12 fotos cada (a primeira é a capa; dá para reordenar);
 - marca o item como **Disponível**, **Reservado** (continua no site com etiqueta) ou **Vendido** (some do site, mas fica no painel);
-- baixa um **backup** do estoque e troca a senha em "Conta".
+- baixa o **backup completo** (catálogo + todas as fotos, em um .zip) e troca a senha no menu "Conta". Se fizer mais de 14 dias que ele não baixa um backup, o painel mostra um lembrete.
 
 O que ele cadastra aparece no site na hora. Enquanto nada for cadastrado, o site mostra os itens de exemplo de `data/catalogo.js`; ao salvar o primeiro item real, os exemplos somem.
 
@@ -30,6 +30,7 @@ O que ele cadastra aparece no site na hora. Enquanto nada for cadastrado, o site
 - Os **dados ficam fora da pasta pública** (`ao-dados/`, ao lado de `public_html`), então atualizar o código pelo GitHub nunca apaga o estoque. Existe `catalogo.anterior.json` com a versão anterior de cada gravação.
 - Senha com bcrypt, sessão por cookie assinado (HttpOnly, SameSite=Strict), proteção CSRF, bloqueio de 15 min após 5 senhas erradas e logout que invalida a sessão no servidor.
 - Fotos são validadas, giradas conforme o EXIF e reduzidas para no máximo 1600 px (JPEG).
+- **Restaurar um backup:** o .zip traz um `LEIA-ME.txt` com os passos. Em resumo, no Gerenciador de Arquivos da Hostinger, envie `catalogo.json` para `ao-dados/` e o conteúdo da pasta `fotos` para `ao-dados/fotos/`. (Testado: apagar tudo e restaurar por esses passos devolve o estoque completo.)
 - A senha inicial só vale até o primeiro acesso: o painel obriga a criar uma senha pessoal. Se esquecer a senha, apague `ao-dados/auth.php` no servidor para voltar à senha inicial.
 
 ## Dados de contato

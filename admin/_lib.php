@@ -105,6 +105,16 @@ function ao_catalogo_modificar(callable $fn) {
     });
 }
 
+/* ---------- Registro do último backup baixado (para o lembrete no painel) ---------- */
+function ao_backup_ultimo(): ?int {
+    $b = ao_guard_ler(ao_dados_dir() . '/backup.php');
+    return isset($b['ultimo']) ? (int) $b['ultimo'] : null;
+}
+
+function ao_backup_registrar(): void {
+    ao_com_trava(function () { ao_guard_escrever(ao_dados_dir() . '/backup.php', ['ultimo' => time()]); });
+}
+
 /* ---------- Senha e sessão (token assinado, sem sessões de PHP) ---------- */
 function ao_hash_atual(): array {
     $a = ao_guard_ler(ao_dados_dir() . '/auth.php');

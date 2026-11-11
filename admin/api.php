@@ -88,14 +88,48 @@ try {
             }
             unset($it);
         }
-        ao_json(200, ['veiculos' => $d['veiculos'], 'imoveis' => $d['imoveis'], 'iniciado' => ao_catalogo_ler() !== null]);
+        ao_json(200, [
+            'veiculos' => $d['veiculos'], 'imoveis' => $d['imoveis'],
+            'iniciado' => ao_catalogo_ler() !== null,
+            'ultimoBackup' => ao_backup_ultimo(),
+        ]);
     }
 
     if ($acao === 'backup') {
+        // Backup completo: catálogo + todas as fotos num único .zip
+        if (!class_exists('ZipArchive')) ao_json(500, ['erro' => 'Este servidor não tem suporte a arquivos .zip.']);
+        @set_time_limit(300);
         $d = ao_catalogo_ler() ?? ['veiculos' => [], 'imoveis' => []];
-        header('Content-Type: application/json; charset=utf-8');
-        header('Content-Disposition: attachment; filename="backup-catalogo-' . date('Y-m-d') . '.json"');
-        echo json_encode($d, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+        $tmp = tempnam(sys_get_temp_dir(), 'aobk');
+        $zip = new ZipArchive();
+        if ($tmp === false || $zip->open($tmp, ZipArchive::OVERWRITE) !== true) ao_json(500, ['erro' => 'Não foi possível montar o backup.']);
+        $zip->addFromString('catalogo.json', json_encode($d, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+        $n = 0;
+        foreach (['veiculos', 'imoveis'] as $t) {
+            foreach ($d[$t] as $it) foreach ($it['fotos'] ?? [] as $f) {
+                $c = ao_fotos_dir() . '/' . $f;
+                if (preg_match(AO_REGEX_FOTO, $f) && is_file($c) && $zip->locateName('fotos/' . $f) === false) {
+                    $zip->addFile($c, 'fotos/' . $f);
+                    $zip->setCompressionName('fotos/' . $f, ZipArchive::CM_STORE);   // JPEG já é comprimido
+                    $n++;
+                }
+            }
+        }
+        $zip->addFromString('LEIA-ME.txt',
+            "Backup do estoque - Alisson Orçatto (" . date('d/m/Y H:i') . ")\r\n" .
+            count($d['veiculos']) . " veículos, " . count($d['imoveis']) . " imóveis, $n fotos.\r\n\r\n" .
+            "COMO RESTAURAR (no Gerenciador de Arquivos da Hostinger):\r\n" .
+            "1. Abra a pasta \"ao-dados\" (fica AO LADO de public_html, não dentro dela).\r\n" .
+            "2. Envie o arquivo catalogo.json para dentro de ao-dados, substituindo o atual.\r\n" .
+            "3. Envie o conteúdo da pasta fotos para ao-dados/fotos.\r\n" .
+            "Pronto: o site e o painel voltam com o estoque deste backup.\r\n");
+        if (!$zip->close()) { @unlink($tmp); ao_json(500, ['erro' => 'Não foi possível finalizar o backup.']); }
+        ao_backup_registrar();
+        header('Content-Type: application/zip');
+        header('Content-Disposition: attachment; filename="backup-estoque-' . date('Y-m-d') . '.zip"');
+        header('Content-Length: ' . filesize($tmp));
+        readfile($tmp);
+        @unlink($tmp);
         exit;
     }
 

@@ -64,7 +64,7 @@
       </div>
       <div id="menu" class="menu" hidden>
         <button type="button" id="m-senha">Trocar senha</button>
-        <a href="api.php?action=backup" id="m-backup">Baixar backup do estoque</a>
+        <a href="api.php?action=backup" id="m-backup" download>Baixar backup completo (com fotos)</a>
         <button type="button" id="m-sair">Sair</button>
       </div>
     </header>
@@ -83,6 +83,8 @@
       <div id="aviso-exemplo" class="note" hidden>
         O site está mostrando itens de <strong>exemplo</strong>. Assim que você cadastrar o primeiro item aqui, eles somem e o site passa a mostrar só o seu estoque.
       </div>
+
+      <div id="aviso-backup" class="note" hidden></div>
 
       <div id="lista" class="rows" aria-live="polite"></div>
     </main>

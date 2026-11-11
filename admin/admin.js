@@ -89,7 +89,7 @@
   /* ---------- lista ---------- */
   function carregar() {
     api('listar').then(function (r) {
-      estado.dados = { veiculos: r.veiculos, imoveis: r.imoveis }; estado.iniciado = r.iniciado;
+      estado.dados = { veiculos: r.veiculos, imoveis: r.imoveis }; estado.iniciado = r.iniciado; estado.ultimoBackup = r.ultimoBackup;
       desenharLista();
     }).catch(function (e) { toast(e.message, true); });
   }
@@ -111,6 +111,14 @@
     $('lista-titulo').textContent = tipo === 'veiculos' ? 'Veículos' : 'Imóveis';
     $('b-novo').textContent = tipo === 'veiculos' ? '+ Novo veículo' : '+ Novo imóvel';
     $('aviso-exemplo').hidden = estado.iniciado;
+    // lembrete de backup: aparece só se já há estoque e o último backup é antigo (ou nunca foi feito)
+    var total = estado.dados.veiculos.length + estado.dados.imoveis.length, av = $('aviso-backup');
+    var dias = estado.ultimoBackup ? Math.floor((Date.now() / 1000 - estado.ultimoBackup) / 86400) : null;
+    if (total && (dias === null || dias >= 14)) {
+      av.innerHTML = (dias === null ? 'Você ainda não baixou nenhum backup do estoque. ' : 'Seu último backup foi há <strong>' + dias + ' dias</strong>. ') +
+        '<a href="api.php?action=backup" download>Baixar backup completo</a> e guardar no celular, e-mail ou Drive.';
+      av.hidden = false;
+    } else { av.hidden = true; }
     var l = $('lista');
     if (!itens.length) {
       l.innerHTML = '<div class="empty">' + (tipo === 'veiculos' ? 'Nenhum veículo cadastrado ainda.' : 'Nenhum imóvel cadastrado ainda.') + '<br>Toque em <strong>“Novo”</strong> para começar.</div>';
