@@ -9,7 +9,7 @@ Site estático (HTML, CSS e JavaScript puros): sem build, sem dependências. Bas
 | Arquivo | O que é |
 | --- | --- |
 | `index.html` | Início: logo AO em 3D (gira ao passar o mouse) e botões **Veículos** / **Imóveis** |
-| `veiculos.html` | Catálogo de veículos, com busca e ordenação |
+| `veiculos.html` | Catálogo de veículos (lê os anúncios do painel), com busca e ordenação |
 | `imoveis.html` | Catálogo de imóveis, com filtros por tipo e finalidade |
 | `financiamento.html` | Simulador (veículo: Price; imóvel: Price ou SAC) |
 | `admin/` | Painel de cadastro do estoque (login por senha) |
@@ -22,11 +22,12 @@ Endereço: `https://SEU-SITE/admin/`. Pelo celular ou computador o Alisson entra
 - marca o item como **Disponível**, **Reservado** (continua no site com etiqueta) ou **Vendido** (some do site, mas fica no painel);
 - baixa o **backup completo** (catálogo + todas as fotos, em um .zip) e troca a senha no menu "Conta". Se fizer mais de 14 dias que ele não baixa um backup, o painel mostra um lembrete.
 
-O que ele cadastra aparece no site na hora. Enquanto nada for cadastrado, o site mostra os itens de exemplo de `data/catalogo.js`; ao salvar o primeiro item real, os exemplos somem.
+O que ele cadastra aparece no site na hora, e o painel confere isso depois de cada "Salvar" (se o site não mostrar o anúncio, ele avisa). Enquanto não houver anúncios, o site mostra "Novos anúncios em breve" com um botão de WhatsApp. Não existem mais itens de exemplo.
 
 ### Como funciona (para quem for dar manutenção)
 
 - Backend em PHP puro, sem banco de dados: `admin/api.php` (painel), `api/catalogo.php` (lista pública) e `api/foto.php` (entrega as fotos).
+- **Cache:** a lista pública (`api/catalogo.php`) nunca é guardada em cache, e as páginas, scripts e estilos são revalidados a cada acesso (`.htaccess`). Ao mudar `.js` ou `.css`, troque o número `?v=...` nos arquivos `.html`. A Hostinger tem CDN: se uma atualização do site não aparecer, limpe o cache em hPanel > Websites > Cache (ou peça para limpar).
 - Os **dados ficam fora da pasta pública** (`ao-dados/`, ao lado de `public_html`), então atualizar o código pelo GitHub nunca apaga o estoque. Existe `catalogo.anterior.json` com a versão anterior de cada gravação.
 - Senha com bcrypt, sessão por cookie assinado (HttpOnly, SameSite=Strict), proteção CSRF, bloqueio de 15 min após 5 senhas erradas e logout que invalida a sessão no servidor.
 - Fotos são validadas, giradas conforme o EXIF e reduzidas para no máximo 1600 px (JPEG).

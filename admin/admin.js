@@ -15,7 +15,7 @@
   var toastT;
   function toast(msg, ruim) {
     var t = $('toast'); t.textContent = msg; t.className = 'toast' + (ruim ? ' bad' : ''); t.hidden = false;
-    clearTimeout(toastT); toastT = setTimeout(function () { t.hidden = true; }, ruim ? 5000 : 2600);
+    clearTimeout(toastT); toastT = setTimeout(function () { t.hidden = true; }, ruim ? 9000 : 2600);
   }
 
   function api(acao, opt) {
@@ -110,7 +110,6 @@
     $('n-imoveis').textContent = estado.dados.imoveis.length ? '(' + estado.dados.imoveis.length + ')' : '';
     $('lista-titulo').textContent = tipo === 'veiculos' ? 'Veículos' : 'Imóveis';
     $('b-novo').textContent = tipo === 'veiculos' ? '+ Novo veículo' : '+ Novo imóvel';
-    $('aviso-exemplo').hidden = estado.iniciado;
     // lembrete de backup: aparece só se já há estoque e o último backup é antigo (ou nunca foi feito)
     var total = estado.dados.veiculos.length + estado.dados.imoveis.length, av = $('aviso-backup');
     var dias = estado.ultimoBackup ? Math.floor((Date.now() / 1000 - estado.ultimoBackup) / 86400) : null;
@@ -274,13 +273,28 @@
     document.querySelectorAll('.field.invalido').forEach(function (e) { e.classList.remove('invalido'); });
     erroEm('item-erro');
   }
+  // Confere, do mesmo jeito que um visitante faria, se o anúncio salvo já aparece no site público.
+  function conferirNoSite(tipo, item) {
+    if (!item || item.status === 'vendido') return Promise.resolve({ ok: true, oculto: true });
+    return fetch('../api/catalogo.php?t=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) { if (!r.ok) throw new Error('o servidor respondeu ' + r.status); return r.json(); })
+      .then(function (d) { return { ok: (d[tipo] || []).some(function (x) { return x.id === item.id; }) }; })
+      .catch(function (e) { return { ok: false, motivo: e.message }; });
+  }
+
   $('f-item').addEventListener('submit', function (ev) {
     ev.preventDefault();
     if (salvando) return;
     if (edit.fotos.some(function (f) { return f.enviando; })) { erroEm('item-erro', 'Aguarde o envio das fotos terminar.'); return; }
     limparErros(); salvando = true; $('b-salvar').disabled = true;
-    api('salvar', { post: true, corpo: { tipo: edit.tipo, item: lerForm() } }).then(function () {
-      fecharForm(true); toast('Salvo! Já está no site.'); estado.iniciado = true; carregar();
+    var tipoSalvo = edit.tipo;
+    api('salvar', { post: true, corpo: { tipo: tipoSalvo, item: lerForm() } }).then(function (r) {
+      fecharForm(true); estado.iniciado = true; carregar();
+      return conferirNoSite(tipoSalvo, r.item).then(function (c) {
+        if (c.oculto) toast('Salvo. Este item está como “Vendido”, então não aparece no site.');
+        else if (c.ok) toast('Salvo! Já está no site.');
+        else toast('Salvo, mas o site ainda NÃO está mostrando este anúncio' + (c.motivo ? ' (' + c.motivo + ')' : '') + '. Atualize o site; se continuar assim, avise quem cuida dele.', true);
+      });
     }).catch(function (e) {
       erroEm('item-erro', e.message);
       var c = (e.dados && e.dados.campos) || {}, primeiro = null;

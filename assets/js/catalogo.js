@@ -1,4 +1,4 @@
-/* Renderiza os catálogos de veículos e imóveis a partir de data/catalogo.js */
+/* Renderiza os catálogos de veículos e imóveis com os anúncios cadastrados no painel (api/catalogo.php) */
 (function () {
   var root = document.querySelector('[data-catalogo]');
   if (!root) return;
@@ -31,9 +31,8 @@
   }
 
   function midia(it) {
-    var badge = it.exemplo ? '<span class="badge">Exemplo</span>'
-      : (it.status === 'reservado' ? '<span class="badge">Reservado</span>'
-      : (it.finalidade === 'Aluguel' ? '<span class="badge">Aluguel</span>' : ''));
+    var badge = it.status === 'reservado' ? '<span class="badge">Reservado</span>'
+      : (it.finalidade === 'Aluguel' ? '<span class="badge">Aluguel</span>' : '');
     if (it.fotos && it.fotos.length) {
       var imgs = it.fotos.map(function (f, i) {
         return '<img src="' + esc(f) + '" alt="' + esc(titulo(it)) + ' — foto ' + (i + 1) + '" loading="lazy">';
@@ -99,9 +98,13 @@
     if (o === 'maior') out.sort(function (a, b) { return b.preco - a.preco; });
     if (o === 'novo') out.sort(function (a, b) { return (b.ano || 0) - (a.ano || 0); });
 
-    lista.innerHTML = out.length
-      ? out.map(card).join('')
-      : '<div class="empty">Nenhum resultado com esses filtros.<br>Me chame no WhatsApp — posso procurar para você!</div>';
+    if (out.length) { lista.innerHTML = out.map(card).join(''); return; }
+    var wa = '<br><a class="btn btn-primary" style="margin-top:16px" href="' + waLink(tipo === 'veiculos'
+      ? 'Olá, Alisson! Estou procurando um veículo. Pode me ajudar?'
+      : 'Olá, Alisson! Estou procurando um imóvel. Pode me ajudar?') + '" target="_blank" rel="noopener">' + WA + 'Falar no WhatsApp</a>';
+    lista.innerHTML = itens.length
+      ? '<div class="empty">Nenhum resultado com esses filtros.<br>Me chame no WhatsApp — posso procurar para você!' + wa + '</div>'
+      : '<div class="empty"><strong>Novos anúncios em breve.</strong><br>Enquanto isso, me diga o que você procura e eu encontro para você.' + wa + '</div>';
   }
 
   function montarFiltros() {
@@ -122,9 +125,29 @@
 
   function usar(lista) { itens = lista || []; montarFiltros(); aplicar(); }
 
-  lista.innerHTML = '<div class="empty">Carregando…</div>';
-  fetch('api/catalogo.php', { cache: 'no-cache' })
-    .then(function (r) { if (!r.ok) throw new Error('sem-dados'); return r.json(); })
-    .then(function (d) { usar(d[tipo]); })
-    .catch(function () { usar((window.CATALOGO && window.CATALOGO[tipo]) || []); }); // exemplos
+  function erro(motivo) {
+    lista.innerHTML = '<div class="empty"><strong>Não consegui carregar os anúncios agora.</strong><br>' +
+      'Atualize a página em instantes ou fale comigo no WhatsApp.' +
+      '<br><button type="button" class="btn" id="b-tentar" style="margin-top:16px">Tentar de novo</button>' +
+      '<br><small style="opacity:.6;display:inline-block;margin-top:12px">(' + esc(motivo) + ')</small></div>';
+    var b = document.getElementById('b-tentar');
+    if (b) b.addEventListener('click', carregar);
+  }
+
+  function carregar() {
+    lista.innerHTML = '<div class="empty">Carregando…</div>';
+    // o número no fim muda a cada acesso, então nenhuma cópia guardada (navegador, servidor ou CDN) é reaproveitada
+    fetch('api/catalogo.php?t=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) {
+        if (!r.ok) throw new Error('servidor respondeu ' + r.status);
+        return r.json().catch(function () { throw new Error('resposta inválida'); });
+      })
+      .then(function (d) {
+        if (!d || !Array.isArray(d[tipo])) throw new Error('lista ausente');
+        usar(d[tipo]);
+      })
+      .catch(function (e) { erro(e && e.message ? e.message : 'sem conexão'); });
+  }
+
+  carregar();
 })();
