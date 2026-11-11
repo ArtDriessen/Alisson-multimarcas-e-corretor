@@ -52,21 +52,38 @@
     // a camada frontal duplicada some atrás da imagem original; a traseira fica como verso
     sideImgs[0].remove();
 
+    // Giro ao passar o mouse. É um movimento disparado pelo próprio visitante,
+    // então ele acontece sempre; só não repete em loop quando o sistema pede
+    // "reduzir animações".
     var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!reduce && body.animate) {
-      var spinning = false, hovering = false;
-      var spin = function () {
-        if (spinning) return;
-        spinning = true;
-        var a = body.animate(
-          [{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(360deg)' }],
-          { duration: 1500, easing: 'cubic-bezier(.5,.05,.25,1)' }
-        );
-        a.onfinish = function () { spinning = false; if (hovering) spin(); };
+    var spinning = false, hovering = false;
+    var spin = function () {
+      if (spinning) return;
+      spinning = true;
+      var done = function () {
+        spinning = false;
+        if (hovering && !reduce) spin();
       };
-      logo.addEventListener('pointerenter', function () { hovering = true; spin(); });
-      logo.addEventListener('pointerleave', function () { hovering = false; });
-      logo.addEventListener('click', spin); // toque no celular
-    }
+      if (!body.animate) {            // navegador muito antigo: usa transição CSS
+        body.style.transition = 'transform 1.2s ease-in-out';
+        body.style.transform = 'rotateY(360deg)';
+        setTimeout(function () {
+          body.style.transition = 'none'; body.style.transform = 'rotateY(0deg)';
+          setTimeout(done, 30);
+        }, 1250);
+        return;
+      }
+      var a = body.animate(
+        [{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(360deg)' }],
+        { duration: reduce ? 1000 : 1500, easing: 'cubic-bezier(.5,.05,.25,1)' }
+      );
+      a.onfinish = done;
+      a.oncancel = done;
+    };
+    logo.addEventListener('pointerenter', function () { hovering = true; spin(); });
+    logo.addEventListener('mouseenter', function () { hovering = true; spin(); });
+    logo.addEventListener('pointerleave', function () { hovering = false; });
+    logo.addEventListener('mouseleave', function () { hovering = false; });
+    logo.addEventListener('click', spin); // toque no celular
   }
 })();
