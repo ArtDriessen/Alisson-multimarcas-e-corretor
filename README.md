@@ -36,7 +36,7 @@ O que ele cadastra aparece no site na hora, e o painel confere isso depois de ca
 
 ## Dados de contato
 
-Edite **`assets/js/config.js`**: WhatsApp, Instagram e CRECI (o CRECI aparece no rodapé quando preenchido).
+Edite **`assets/js/config.js`**: WhatsApp, Instagram e CRECI (o CRECI aparece no rodapé da página inicial, dos imóveis e de cada anúncio de imóvel).
 
 ## Observações
 

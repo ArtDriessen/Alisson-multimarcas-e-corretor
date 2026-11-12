@@ -4,7 +4,7 @@ window.SITE = {
   whatsapp: '5541992330484',        // DDI + DDD + número, só dígitos
   whatsappExibicao: '(41) 99233-0484',
   instagram: 'alisson_o.c',         // sem o @
-  creci: '',                        // ex.: 'CRECI 00000-F' — aparece no rodapé quando preenchido
+  creci: 'CRECI 42733F',                        // ex.: 'CRECI 00000-F' — aparece no rodapé quando preenchido
   mensagemPadrao: 'Olá, Alisson! Vim pelo seu site e gostaria de mais informações.'
 };
 

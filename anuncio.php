@@ -11,7 +11,7 @@ header('Content-Type: text/html; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');   // preço/situação mudam: nunca servir cópia velha
 header('X-Content-Type-Options: nosniff');
 
-const VER = '20261112b';   // mude junto com os ?v= das outras páginas quando alterar .css/.js
+const VER = '20261112c';   // mude junto com os ?v= das outras páginas quando alterar .css/.js
 
 function h($v): string { return htmlspecialchars((string) $v, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
 function reais($n): string { return 'R$ ' . number_format((float) $n, 0, ',', '.'); }
@@ -83,11 +83,10 @@ function ao_topo(string $titulo, string $desc, string $extra, string $atual, str
   </header>
 <?php }
 
-function ao_rodape(string $ver, bool $comGaleria): void { ?>
+function ao_rodape(string $ver, bool $comGaleria, bool $creci = false): void { ?>
   <footer class="footer">
     <p><a data-wa href="#">WhatsApp <span data-wa-num></span></a> · <a data-ig data-ig-text href="#">Instagram</a></p>
-    <p data-creci></p>
-    <p>© <span data-year>2026</span> Alisson Orçatto · Corretor automotivo e imobiliário</p>
+    <p>© <span data-year>2026</span> Alisson Orçatto<?php if ($creci): ?> · <span data-creci></span><?php endif; ?> · Corretor automotivo e imobiliário</p>
   </footer>
 
   <script src="assets/js/config.js?v=<?= h($ver) ?>"></script>
@@ -117,7 +116,7 @@ if ($item === null) {
       <a class="btn" style="margin-top:16px" data-wa="Olá, Alisson! O anúncio que eu procurava não está mais disponível. Pode me ajudar a encontrar algo parecido?" href="#"><?= $ICO_ZAP ?>Falar no WhatsApp</a>
     </div>
   </main>
-<?php ao_rodape(VER, false); exit; }
+<?php ao_rodape(VER, false, $tipo === 'imoveis'); exit; }
 
 /* ---------- Dados do anúncio ---------- */
 $ehVeiculo = $tipo === 'veiculos';
@@ -241,10 +240,13 @@ ao_topo($tituloPag, $descMeta, $extra, $tipo, VER); ?>
         <div class="descricao"><?= h($descricao) ?></div>
 <?php endif; ?>
 
+<?php if (!$ehVeiculo): ?>
+        <p class="corretor">Alisson Orçatto · <span data-creci></span></p>
+<?php endif; ?>
         <p class="aviso">Preços e disponibilidade sujeitos a alteração sem aviso prévio. Fotos meramente ilustrativas.</p>
       </section>
     </article>
 
     <p class="voltar-lista"><a href="<?= h($voltaUrl) ?>">← Ver todos os <?= h(mb_strtolower($voltaTxt)) ?></a></p>
   </main>
-<?php ao_rodape(VER, true);
+<?php ao_rodape(VER, true, !$ehVeiculo);
