@@ -279,7 +279,36 @@ function ao_processar_foto(string $tmp): string {
 }
 
 function ao_foto_apagar(string $nome): void {
-    if (preg_match(AO_REGEX_FOTO, $nome)) @unlink(ao_fotos_dir() . '/' . $nome);
+    if (!preg_match(AO_REGEX_FOTO, $nome)) return;
+    @unlink(ao_fotos_dir() . '/' . $nome);
+    foreach (AO_LARGURAS_FOTO as $w) @unlink(ao_dados_dir() . '/fotos-cache/' . $w . '-' . $nome);   // miniaturas
+}
+
+/* Larguras de miniatura permitidas (qualquer outra é ignorada) */
+const AO_LARGURAS_FOTO = [400, 800, 1200];
+
+/** Caminho da foto reduzida para $w px de largura (gera e guarda se ainda não existir). null = use a original. */
+function ao_foto_reduzida(string $nome, int $w): ?string {
+    $orig = ao_fotos_dir() . '/' . $nome;
+    $dir = ao_dados_dir() . '/fotos-cache';
+    $dest = $dir . '/' . $w . '-' . $nome;
+    if (is_file($dest) && filemtime($dest) >= filemtime($orig)) return $dest;
+    if (!function_exists('imagecreatefromjpeg')) return null;
+    if (!is_dir($dir) && !@mkdir($dir, 0750, true)) return null;
+    $info = @getimagesize($orig);
+    if (!$info || $info[0] <= $w) return null;                       // já é pequena: serve a original
+    $im = @imagecreatefromjpeg($orig);
+    if (!$im) return null;
+    $nh = max(1, (int) round($info[1] * $w / $info[0]));
+    $out = imagecreatetruecolor($w, $nh);
+    imagecopyresampled($out, $im, 0, 0, 0, 0, $w, $nh, $info[0], $info[1]);
+    imagedestroy($im);
+    $tmp = $dest . '.' . bin2hex(random_bytes(4)) . '.tmp';
+    $ok = imagejpeg($out, $tmp, 80);
+    imagedestroy($out);
+    if (!$ok || !@rename($tmp, $dest)) { @unlink($tmp); return null; }
+    @chmod($dest, 0640);
+    return $dest;
 }
 
 /* ---------- Validação dos itens ---------- */

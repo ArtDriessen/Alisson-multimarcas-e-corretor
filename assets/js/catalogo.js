@@ -72,8 +72,9 @@
     var simular = podeSimular
       ? '<a class="btn" href="financiamento.html?tipo=' + (tipo === 'veiculos' ? 'veiculo' : 'imovel') + '&valor=' + encodeURIComponent(it.preco) + '">Simular</a>'
       : '<span></span>';
-    return '<article class="card">' + midia(it) +
-      '<div class="card-body"><h3>' + esc(nome) + '</h3>' + sub + specs(it) + (it.descricao ? '<p class="sub desc">' + esc(it.descricao) + '</p>' : '') + '<p class="price metal">' + preco + '</p></div>' +
+    var href = 'anuncio.php?tipo=' + tipo + '&id=' + encodeURIComponent(it.id);
+    return '<article class="card" data-href="' + esc(href) + '">' + midia(it) +
+      '<div class="card-body"><h3><a href="' + esc(href) + '">' + esc(nome) + '</a></h3>' + sub + specs(it) + (it.descricao ? '<p class="sub desc">' + esc(it.descricao) + '</p>' : '') + '<p class="price metal">' + preco + '</p><a class="mais" href="' + esc(href) + '">Ver detalhes completos →</a></div>' +
       '<div class="card-actions"><a class="btn btn-primary" href="' + waLink(msg) + '" target="_blank" rel="noopener">' + WA + 'Tenho interesse</a>' + simular + '</div>' +
       '</article>';
   }
@@ -118,7 +119,13 @@
   // setas do carrossel de fotos
   lista.addEventListener('click', function (e) {
     var b = e.target.closest('.nav-btn');
-    if (!b) return;
+    if (!b) {
+      // clique em qualquer parte do cartão (menos links/botões) abre o anúncio completo
+      if (e.target.closest('a, button, input, select, textarea') || e.button) return;
+      var c = e.target.closest('.card[data-href]');
+      if (c) location.href = c.getAttribute('data-href');
+      return;
+    }
     var strip = b.parentElement.querySelector('.strip');
     strip.scrollBy({ left: (b.classList.contains('next') ? 1 : -1) * strip.clientWidth, behavior: 'smooth' });
   });

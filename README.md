@@ -26,7 +26,7 @@ O que ele cadastra aparece no site na hora, e o painel confere isso depois de ca
 
 ### Como funciona (para quem for dar manutenção)
 
-- Backend em PHP puro, sem banco de dados: `admin/api.php` (painel), `api/catalogo.php` (lista pública) e `api/foto.php` (entrega as fotos).
+- Backend em PHP puro, sem banco de dados: `admin/api.php` (painel), `api/catalogo.php` (lista pública), `api/foto.php` (entrega as fotos; `&w=400|800|1200` gera miniaturas em `ao-dados/fotos-cache`) e `anuncio.php` (página completa de cada anúncio, aberta ao clicar no cartão; traz foto/preço na prévia do WhatsApp). Ao mudar `.js`/`.css`, troque também `VER` em `anuncio.php`.
 - **Cache:** a lista pública (`api/catalogo.php`) nunca é guardada em cache, e as páginas, scripts e estilos são revalidados a cada acesso (`.htaccess`). Ao mudar `.js` ou `.css`, troque o número `?v=...` nos arquivos `.html`. A Hostinger tem CDN: se uma atualização do site não aparecer, limpe o cache em hPanel > Websites > Cache (ou peça para limpar).
 - Os **dados ficam fora da pasta pública** (`ao-dados/`, ao lado de `public_html`), então atualizar o código pelo GitHub nunca apaga o estoque. Existe `catalogo.anterior.json` com a versão anterior de cada gravação.
 - Senha com bcrypt, sessão por cookie assinado (HttpOnly, SameSite=Strict), proteção CSRF, bloqueio de 15 min após 5 senhas erradas e logout que invalida a sessão no servidor.
