@@ -205,13 +205,18 @@
   $('b-fechar').addEventListener('click', function () { fecharForm(); });
   $('b-cancelar').addEventListener('click', function () { fecharForm(); });
   $('modal').addEventListener('mousedown', function (e) { if (e.target === $('modal')) fecharForm(); });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('modal').hidden) fecharForm(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    if (arrasto) { finalizar(false); return; }
+    if (!$('modal').hidden) fecharForm();
+  });
 
   /* ---------- fotos ---------- */
   function desenharFotos() {
+    if (arrasto && arrasto.ativo) { redesenhar = true; return; }   // adia até soltar
     var h = edit.fotos.map(function (f, i) {
       return '<div class="foto' + (f.enviando ? ' enviando' : '') + '" data-i="' + i + '">' +
-        (f.url ? '<img src="' + esc(f.url) + '" alt="Foto ' + (i + 1) + '">' : '') +
+        (f.url ? '<img src="' + esc(f.url) + '" alt="Foto ' + (i + 1) + '" draggable="false">' : '') +
         (i === 0 && !f.enviando ? '<span class="capa">Capa</span>' : '') +
         (f.enviando ? '' : '<div class="ctl">' +
           '<button type="button" data-a="esq" aria-label="Mover para a esquerda"' + (i === 0 ? ' disabled style="opacity:.3"' : '') + '>←</button>' +
@@ -221,6 +226,7 @@
     }).join('');
     if (edit.fotos.length < 12) h += '<button type="button" class="add-foto" id="b-addfoto"><b>+</b>Adicionar fotos</button>';
     $('fotos').innerHTML = h;
+    Array.prototype.forEach.call($('fotos').querySelectorAll('.foto'), function (el, i) { el._foto = edit.fotos[i]; });
   }
   $('fotos').addEventListener('click', function (e) {
     if (e.target.closest('#b-addfoto')) { $('in-fotos').click(); return; }
@@ -231,6 +237,120 @@
     if (a === 'dir' && i < f.length - 1) { var u = f[i + 1]; f[i + 1] = f[i]; f[i] = u; }
     desenharFotos();
   });
+  /* ---------- arrastar e soltar as fotos (mouse e toque) ---------- */
+  var arrasto = null, redesenhar = false;
+
+  $('fotos').addEventListener('pointerdown', function (e) {
+    if (arrasto || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    var el = e.target.closest('.foto');
+    if (!el || e.target.closest('button') || el.classList.contains('enviando')) return;
+    arrasto = { el: el, id: e.pointerId, x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY,
+      toque: e.pointerType === 'touch', ativo: false, ordem: null, ghost: null, timer: null, rolagem: null, dx: 0, dy: 0 };
+    // no toque, é preciso segurar um instante (senão o dedo está só rolando a tela)
+    if (arrasto.toque) arrasto.timer = setTimeout(function () { if (arrasto && !arrasto.ativo) iniciarArrasto(); }, 260);
+    window.addEventListener('pointermove', moverArrasto, { passive: false });
+    window.addEventListener('pointerup', soltarArrasto);
+    window.addEventListener('pointercancel', cancelarArrasto);
+  });
+
+  function iniciarArrasto() {
+    var a = arrasto; a.ativo = true;
+    var r = a.el.getBoundingClientRect();
+    a.dx = a.x0 - r.left; a.dy = a.y0 - r.top;
+    a.ordem = Array.prototype.slice.call($('fotos').querySelectorAll('.foto'));
+    // posição de cada "casa" da grade (fixa durante o arrasto), em coordenadas do conteúdo que rola
+    var c = $('modal').querySelector('.sheet-body');
+    a.casas = a.ordem.map(function (el) { var q = el.getBoundingClientRect(); return { l: q.left, r: q.right, t: q.top + c.scrollTop, b: q.bottom + c.scrollTop }; });
+    var g = a.el.cloneNode(true); g.className = 'foto fantasma';
+    var ctl = g.querySelector('.ctl'); if (ctl) ctl.remove();
+    g.style.width = r.width + 'px'; g.style.height = r.height + 'px';
+    document.body.appendChild(g); a.ghost = g;
+    a.el.classList.add('arrastando'); $('fotos').classList.add('em-arrasto');
+    a.ordem.forEach(function (el, i) { el.style.order = i; });      // a ordem visual muda sem mover os elementos de lugar
+    var add = $('b-addfoto'); if (add) add.style.order = 1000;      // o botão "+" fica sempre por último
+    try { a.el.setPointerCapture(a.id); } catch (_) {}
+    if (a.toque && navigator.vibrate) navigator.vibrate(12);
+    a.rolagem = setInterval(rolarArrasto, 16);
+    posicionarFantasma(); atualizarAlvo();
+  }
+
+  function moverArrasto(e) {
+    var a = arrasto; if (!a || e.pointerId !== a.id) return;
+    a.x = e.clientX; a.y = e.clientY;
+    if (!a.ativo) {
+      var d = Math.hypot(a.x - a.x0, a.y - a.y0);
+      if (a.toque) { if (d > 10) finalizar(false); return; }        // mexeu antes de segurar: é rolagem
+      if (d < 6) return;                                            // clique simples: não é arrasto
+      iniciarArrasto();
+    }
+    e.preventDefault();
+    posicionarFantasma(); atualizarAlvo();
+  }
+
+  function posicionarFantasma() {
+    var a = arrasto; if (!a || !a.ghost) return;
+    a.ghost.style.left = (a.x - a.dx) + 'px'; a.ghost.style.top = (a.y - a.dy) + 'px';
+  }
+
+  function atualizarAlvo() {
+    var a = arrasto; if (!a || !a.ativo) return;
+    var y = a.y + $('modal').querySelector('.sheet-body').scrollTop, para = -1;
+    for (var i = 0; i < a.casas.length; i++) {
+      var k = a.casas[i];
+      if (a.x >= k.l && a.x <= k.r && y >= k.t && y <= k.b) { para = i; break; }
+    }
+    if (para < 0) return;                                            // cursor entre casas ou fora da grade: nada muda
+    var de = a.ordem.indexOf(a.el);
+    if (de < 0 || de === para) return;
+    var antes = a.ordem.map(function (el) { return el.getBoundingClientRect(); });
+    var velho = a.ordem.slice();
+    a.ordem.splice(de, 1); a.ordem.splice(para, 0, a.el);
+    a.ordem.forEach(function (el, k) { el.style.order = k; });
+    velho.forEach(function (el, k) {                                 // animação suave: as outras fotos "deslizam"
+      if (el === a.el || !el.animate) return;
+      var d = el.getBoundingClientRect(), dx = antes[k].left - d.left, dy = antes[k].top - d.top;
+      if (dx || dy) el.animate([{ transform: 'translate(' + dx + 'px,' + dy + 'px)' }, { transform: 'none' }], { duration: 160, easing: 'ease-out' });
+    });
+  }
+
+  function rolarArrasto() {                                          // perto da borda, a tela rola sozinha
+    var a = arrasto; if (!a || !a.ativo) return;
+    var c = $('modal').querySelector('.sheet-body'), r = c.getBoundingClientRect(), v = 0;
+    if (a.y < r.top + 48) v = -Math.ceil((r.top + 48 - a.y) / 4);
+    else if (a.y > r.bottom - 48) v = Math.ceil((a.y - (r.bottom - 48)) / 4);
+    if (v) { c.scrollTop += Math.max(-18, Math.min(18, v)); atualizarAlvo(); }
+  }
+
+  function soltarArrasto(e) { if (arrasto && e.pointerId === arrasto.id) finalizar(true); }
+  function cancelarArrasto(e) { if (arrasto && e.pointerId === arrasto.id) finalizar(false); }
+
+  function finalizar(confirmar) {
+    var a = arrasto; if (!a) return;
+    arrasto = null;
+    clearTimeout(a.timer); clearInterval(a.rolagem);
+    window.removeEventListener('pointermove', moverArrasto);
+    window.removeEventListener('pointerup', soltarArrasto);
+    window.removeEventListener('pointercancel', cancelarArrasto);
+    if (!a.ativo) return;
+    if (a.ghost) a.ghost.remove();
+    a.ordem.forEach(function (el) { el.style.order = ''; });
+    var add = $('b-addfoto'); if (add) add.style.order = '';
+    a.el.classList.remove('arrastando'); $('fotos').classList.remove('em-arrasto');
+    try { a.el.releasePointerCapture(a.id); } catch (_) {}
+    if (confirmar && edit) {
+      var novo = a.ordem.map(function (el) { return el._foto; }).filter(function (f) { return f && edit.fotos.indexOf(f) !== -1; });
+      var sobras = edit.fotos.filter(function (f) { return novo.indexOf(f) === -1; });   // ex.: foto que terminou de subir durante o arrasto
+      edit.fotos = novo.concat(sobras);
+    }
+    redesenhar = false;
+    if (edit) desenharFotos();
+  }
+
+  // enquanto arrasta no celular, a tela não pode rolar junto
+  document.addEventListener('touchmove', function (e) { if (arrasto && arrasto.ativo && e.cancelable) e.preventDefault(); }, { passive: false });
+  // o menu "salvar imagem" do toque longo não deve aparecer por cima do arrasto
+  $('fotos').addEventListener('contextmenu', function (e) { e.preventDefault(); });
+
   $('in-fotos').addEventListener('change', function () {
     var arq = Array.prototype.slice.call(this.files || []); this.value = '';
     var vagas = 12 - edit.fotos.length;
