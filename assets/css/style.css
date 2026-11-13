@@ -448,3 +448,4 @@ main.page { max-width: var(--maxw); margin: 0 auto; padding: 34px 18px 130px; }
 .ficha > div:last-child:nth-child(odd) { grid-column: 1 / -1; }
 .info .corretor { margin: 26px 0 0; font-weight: 600; color: var(--silver); }
 .info .corretor + .aviso { margin-top: 6px; }
+.desc-box .sec { margin-top: 24px; }

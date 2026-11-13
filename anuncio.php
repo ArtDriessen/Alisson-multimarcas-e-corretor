@@ -212,6 +212,12 @@ ao_topo($tituloPag, $descMeta, $extra, $tipo, VER); ?>
 <?php endforeach; ?>
         </div>
 <?php endif; ?>
+<?php if ($descricao !== ''): ?>
+        <div class="desc-box">
+          <h2 class="sec">Sobre este <?= $ehVeiculo ? 'veículo' : 'imóvel' ?></h2>
+          <div class="descricao"><?= h($descricao) ?></div>
+        </div>
+<?php endif; ?>
       </section>
 
       <section class="info">
@@ -234,11 +240,6 @@ ao_topo($tituloPag, $descMeta, $extra, $tipo, VER); ?>
           <div><dt><?= h($k) ?></dt><dd><?= h($v) ?></dd></div>
 <?php endforeach; ?>
         </dl>
-
-<?php if ($descricao !== ''): ?>
-        <h2 class="sec">Sobre este <?= $ehVeiculo ? 'veículo' : 'imóvel' ?></h2>
-        <div class="descricao"><?= h($descricao) ?></div>
-<?php endif; ?>
 
 <?php if (!$ehVeiculo): ?>
         <p class="corretor">Alisson Orçatto · <span data-creci></span></p>
