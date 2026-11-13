@@ -399,21 +399,22 @@ main.page { max-width: var(--maxw); margin: 0 auto; padding: 34px 18px 130px; }
 .crumbs a:hover { text-decoration: underline; }
 .crumbs [aria-current] { color: var(--text); }
 
-.anuncio { display: grid; gap: 26px; align-items: start; }
+.anuncio { display: grid; grid-template-columns: minmax(0, 1fr); gap: 26px; align-items: start; }
+.galeria, .info { min-width: 0; }
 @media (min-width: 900px) { .anuncio { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 38px; } }
 
 .gal-main { position: relative; aspect-ratio: 4 / 3; background: #0a0a0b; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
 .gal-strip { display: flex; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; outline-offset: -3px; }
 .gal-strip::-webkit-scrollbar { display: none; }
-.gal-strip img { flex: 0 0 100%; width: 100%; height: 100%; object-fit: cover; scroll-snap-align: center; cursor: zoom-in; }
+.gal-strip img { flex: 0 0 100%; width: 100%; height: 100%; object-fit: contain; background: #0a0a0b; scroll-snap-align: center; cursor: zoom-in; }
 .gal-main .nav-btn { width: 42px; height: 42px; }
 .gal-main .nav-btn svg { width: 20px; height: 20px; }
 .gal-count { position: absolute; right: 12px; bottom: 12px; padding: 4px 10px; border-radius: 999px; font-size: .72rem; font-weight: 600; background: rgba(8,8,9,.82); border: 1px solid var(--line-strong); }
 .gal-zoom { position: absolute; right: 12px; top: 12px; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: rgba(8,8,9,.75); border: 1px solid var(--line-strong); color: var(--text); cursor: pointer; }
 .gal-zoom svg { width: 18px; height: 18px; }
 .gal-main .ph { height: 100%; display: grid; place-items: center; color: var(--silver-3); }
-.gal-thumbs { display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
-.gal-thumbs button { flex: 0 0 76px; height: 58px; padding: 0; border-radius: 10px; overflow: hidden; border: 2px solid transparent; background: #0a0a0b; cursor: pointer; opacity: .6; }
+.gal-thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); gap: 8px; margin-top: 10px; }
+.gal-thumbs button { aspect-ratio: 4 / 3; min-width: 0; padding: 0; border-radius: 10px; overflow: hidden; border: 2px solid transparent; background: #0a0a0b; cursor: pointer; opacity: .6; }
 .gal-thumbs button[aria-current="true"] { border-color: var(--silver); opacity: 1; }
 .gal-thumbs img { width: 100%; height: 100%; object-fit: cover; }
 

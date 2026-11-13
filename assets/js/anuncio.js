@@ -31,7 +31,7 @@
     atual = i;
     if (cont) cont.textContent = (i + 1) + ' / ' + n;
     thumbs.forEach(function (t, k) {
-      if (k === i) { t.setAttribute('aria-current', 'true'); t.scrollIntoView && t.parentElement.scrollTo({ left: t.offsetLeft - 8, behavior: 'smooth' }); }
+      if (k === i) t.setAttribute('aria-current', 'true');
       else t.removeAttribute('aria-current');
     });
   }
