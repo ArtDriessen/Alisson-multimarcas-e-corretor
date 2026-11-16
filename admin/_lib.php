@@ -319,6 +319,17 @@ function ao_txt($v, int $max): string {
     return function_exists('mb_substr') ? mb_substr($v, 0, $max) : substr($v, 0, $max);
 }
 
+/** Preço em reais com centavos. Aceita 5287000, "5.287.000,50" ou "5287000.50". */
+function ao_preco($v): ?float {
+    if (is_int($v) || is_float($v)) return round((float) $v, 2);
+    if (!is_string($v)) return null;
+    $s = trim($v);
+    if ($s === '') return null;
+    if (strpos($s, ',') !== false) $s = str_replace(',', '.', str_replace('.', '', $s));   // formato brasileiro
+    elseif (!preg_match('/^\d+(\.\d{1,2})?$/', $s)) $s = preg_replace('/\D/', '', $s) ?? '';     // 5.287.000 -> 5287000
+    return preg_match('/^\d+(\.\d+)?$/', $s) ? round((float) $s, 2) : null;
+}
+
 function ao_num($v): ?int {
     if (is_int($v)) return $v;
     if (is_float($v)) return (int) round($v);
@@ -334,11 +345,11 @@ function ao_normalizar(string $tipo, array $in, ?array $atual): array {
 
     $it['status'] = array_key_exists($in['status'] ?? '', $o['status']) ? $in['status'] : AO_PARA_NORMAL;
 
-    $preco = ao_num($in['preco'] ?? null);
+    $preco = ao_preco($in['preco'] ?? null);
     if ($preco === null || $preco <= 0) $e['preco'] = 'Informe o preço.';
     elseif ($preco > 500000000) $e['preco'] = 'Preço alto demais.';
     $it['preco'] = $preco ?? 0;
-    $it['descricao'] = ao_txt($in['descricao'] ?? '', 1500);
+    $it['descricao'] = ao_txt($in['descricao'] ?? '', 200000);
 
     if ($tipo === 'veiculos') {
         $it['marca']  = ao_txt($in['marca'] ?? '', 40);
@@ -374,7 +385,7 @@ function ao_normalizar(string $tipo, array $in, ?array $atual): array {
     foreach ((array) ($in['fotos'] ?? []) as $f) {
         if (is_string($f) && preg_match(AO_REGEX_FOTO, $f) && is_file(ao_fotos_dir() . '/' . $f) && !in_array($f, $fotos, true)) $fotos[] = $f;
     }
-    $it['fotos'] = array_slice($fotos, 0, 12);
+    $it['fotos'] = $fotos;
 
     if ($e) return [null, $e];
     return [$it, []];

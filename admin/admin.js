@@ -8,7 +8,7 @@
 
   /* ---------- utilidades ---------- */
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  function brl(n) { return Number(n || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }); }
+  function brl(n) { return Number(n || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: (Number(n) % 1 ? 2 : 0), maximumFractionDigits: 2 }); }
   function milhar(n) { return Number(n || 0).toLocaleString('pt-BR'); }
   function soDig(s) { return String(s == null ? '' : s).replace(/\D/g, ''); }
 
@@ -152,7 +152,19 @@
     return '<div class="row"><label for="c-' + id + '">' + rotulo + '</label>' + html + (dica ? '<p class="hint">' + dica + '</p>' : '') + '<p class="msg-campo" id="e-' + id + '" hidden></p></div>';
   }
   function inp(id, v, extra) { return '<input class="field" id="c-' + id + '" value="' + esc(v == null ? '' : v) + '" ' + (extra || '') + '>'; }
-  function dinheiro(id, v) { return '<div class="money"><span>R$</span><input class="field" id="c-' + id + '" inputmode="numeric" autocomplete="off" value="' + (v ? milhar(v) : '') + '"></div>'; }
+  function fmtCentavos(v) {
+    if (!v && v !== 0) return '';
+    var p = Number(v).toFixed(2).split('.');
+    return Number(p[0]).toLocaleString('pt-BR') + (p[1] === '00' ? '' : ',' + p[1]);
+  }
+  function mascaraPreco(txt) {                     // 5287000,5 -> 5.287.000,5 (até 2 casas depois da vírgula)
+    var t = String(txt).replace(/[^\d,]/g, ''), i = t.indexOf(',');
+    var inteiro = (i < 0 ? t : t.slice(0, i)).replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+    var dec = i < 0 ? null : t.slice(i + 1).replace(/\D/g, '').slice(0, 2);
+    var out = inteiro ? Number(inteiro).toLocaleString('pt-BR') : (dec !== null ? '0' : '');
+    return dec !== null ? out + ',' + dec : out;
+  }
+  function dinheiro(id, v) { return '<div class="money"><span>R$</span><input class="field" id="c-' + id + '" inputmode="decimal" autocomplete="off" value="' + (id === 'preco' ? fmtCentavos(v) : (v ? milhar(v) : '')) + '"></div>'; }
 
   function desenharCampos(tipo, it) {
     it = it || {}; var o = estado.opcoes, h = '';
@@ -180,7 +192,10 @@
     $('campos').innerHTML = h;
     ['preco', 'km', 'area'].forEach(function (id) {
       var el = $('c-' + id); if (!el) return;
-      el.addEventListener('input', function () { var d = soDig(el.value); el.value = d ? Number(d).toLocaleString('pt-BR') : ''; });
+      el.addEventListener('input', function () {
+        if (id === 'preco') { el.value = mascaraPreco(el.value); return; }
+        var d = soDig(el.value); el.value = d ? Number(d).toLocaleString('pt-BR') : '';
+      });
     });
   }
 
@@ -224,7 +239,7 @@
           '<button type="button" data-a="dir" aria-label="Mover para a direita"' + (i === edit.fotos.length - 1 ? ' disabled style="opacity:.3"' : '') + '>→</button></div>') +
         '</div>';
     }).join('');
-    if (edit.fotos.length < 12) h += '<button type="button" class="add-foto" id="b-addfoto"><b>+</b>Adicionar fotos</button>';
+    h += '<button type="button" class="add-foto" id="b-addfoto"><b>+</b>Adicionar fotos</button>';
     $('fotos').innerHTML = h;
     Array.prototype.forEach.call($('fotos').querySelectorAll('.foto'), function (el, i) { el._foto = edit.fotos[i]; });
   }
@@ -353,8 +368,6 @@
 
   $('in-fotos').addEventListener('change', function () {
     var arq = Array.prototype.slice.call(this.files || []); this.value = '';
-    var vagas = 12 - edit.fotos.length;
-    if (arq.length > vagas) { toast('Limite de 12 fotos. Enviando só as ' + vagas + ' primeiras.', true); arq = arq.slice(0, vagas); }
     var ref = edit;                                  // se fechar o formulário no meio, descarta
     var fila = arq.reduce(function (p, file) {
       return p.then(function () {
@@ -374,7 +387,7 @@
   /* ---------- salvar / excluir ---------- */
   function lerForm() {
     var tipo = edit.tipo, v = function (id) { var e = $('c-' + id); return e ? e.value : ''; };
-    var item = { id: edit.id || undefined, preco: soDig(v('preco')), descricao: v('descricao'), status: v('status'),
+    var item = { id: edit.id || undefined, preco: v('preco').replace(/\./g, '').replace(',', '.'), descricao: v('descricao'), status: v('status'),
       fotos: edit.fotos.map(function (f) { return f.nome; }).filter(Boolean) };
     var campos = tipo === 'veiculos'
       ? ['marca', 'modelo', 'ano', 'km', 'cambio', 'combustivel', 'cor']

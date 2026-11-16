@@ -15,7 +15,8 @@ window.waLink = function (texto) {
 window.brl = function (n, casas) {
   return Number(n).toLocaleString('pt-BR', {
     style: 'currency', currency: 'BRL',
-    minimumFractionDigits: casas === undefined ? 0 : casas,
-    maximumFractionDigits: casas === undefined ? 0 : casas
+    // sem casas informadas: mostra centavos só quando o valor tem centavos (R$ 5.287.000 ou R$ 89.900,50)
+    minimumFractionDigits: casas === undefined ? (Number(n) % 1 ? 2 : 0) : casas,
+    maximumFractionDigits: casas === undefined ? (Number(n) % 1 ? 2 : 0) : casas
   });
 };

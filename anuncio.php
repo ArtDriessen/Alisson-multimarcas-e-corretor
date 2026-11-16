@@ -14,7 +14,7 @@ header('X-Content-Type-Options: nosniff');
 const VER = '20261113a';   // mude junto com os ?v= das outras páginas quando alterar .css/.js
 
 function h($v): string { return htmlspecialchars((string) $v, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
-function reais($n): string { return 'R$ ' . number_format((float) $n, 0, ',', '.'); }
+function reais($n): string { $n = (float) $n; return 'R$ ' . number_format($n, fmod($n, 1.0) != 0.0 ? 2 : 0, ',', '.'); }
 function milhar($n): string { return number_format((float) $n, 0, ',', '.'); }
 function corta(string $s, int $max): string {
     $s = trim(preg_replace('/\s+/u', ' ', $s) ?? '');
@@ -123,7 +123,7 @@ $ehVeiculo = $tipo === 'veiculos';
 $nome = $ehVeiculo ? trim(($item['marca'] ?? '') . ' ' . ($item['modelo'] ?? '')) : trim((string) ($item['titulo'] ?? ''));
 $aluguel = !$ehVeiculo && (($item['finalidade'] ?? '') === 'Aluguel');
 $reservado = ($item['status'] ?? '') === 'reservado';
-$preco = (int) ($item['preco'] ?? 0);
+$preco = round((float) ($item['preco'] ?? 0), 2);
 $precoTxt = reais($preco) . ($aluguel ? ' / mês' : '');
 $descricao = trim((string) ($item['descricao'] ?? ''));
 $fotos = array_values(array_filter((array) ($item['fotos'] ?? []), fn($f) => is_string($f) && preg_match(AO_REGEX_FOTO, $f) && is_file(ao_fotos_dir() . '/' . $f)));

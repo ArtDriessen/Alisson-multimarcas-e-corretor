@@ -18,7 +18,7 @@ Site estático (HTML, CSS e JavaScript puros): sem build, sem dependências. Bas
 
 Endereço: `https://SEU-SITE/admin/`. Pelo celular ou computador o Alisson entra com a senha dele e:
 
-- cadastra, edita e exclui **veículos** e **imóveis**, com até 12 fotos cada (a primeira é a capa; dá para reordenar);
+- cadastra, edita e exclui **veículos** e **imóveis**, com quantas fotos quiser (sem limite) (a primeira é a capa; dá para reordenar);
 - marca o item como **Disponível**, **Reservado** (continua no site com etiqueta) ou **Vendido** (some do site, mas fica no painel);
 - baixa o **backup completo** (catálogo + todas as fotos, em um .zip) e troca a senha no menu "Conta". Se fizer mais de 14 dias que ele não baixa um backup, o painel mostra um lembrete.
 

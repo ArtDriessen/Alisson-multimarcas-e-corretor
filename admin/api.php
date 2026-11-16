@@ -20,8 +20,8 @@ try {
 
     $corpo = [];
     if ($metodo === 'POST' && $acao !== 'enviar_foto') {
-        $raw = file_get_contents('php://input', false, null, 0, 1048577);
-        if ($raw !== false && strlen($raw) > 1048576) ao_json(413, ['erro' => 'Requisição grande demais.']);
+        $raw = file_get_contents('php://input', false, null, 0, 4194305);
+        if ($raw !== false && strlen($raw) > 4194304) ao_json(413, ['erro' => 'Requisição grande demais.']);
         $corpo = json_decode((string) $raw, true);
         if (!is_array($corpo)) $corpo = [];
     }
