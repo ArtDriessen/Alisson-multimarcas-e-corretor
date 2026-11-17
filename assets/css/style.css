@@ -273,7 +273,10 @@ main.page { max-width: var(--maxw); margin: 0 auto; padding: 34px 18px 130px; }
 .media { position: relative; aspect-ratio: 4 / 3; background: #0a0a0b; overflow: hidden; }
 .strip { display: flex; position: absolute; inset: 0; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
 .strip::-webkit-scrollbar { display: none; }
-.strip img { flex: 0 0 100%; width: 100%; height: 100%; object-fit: cover; object-position: 50% 60%; scroll-snap-align: center; }
+.strip .slide { flex: 0 0 100%; position: relative; overflow: hidden; scroll-snap-align: center; background: #0a0a0b; }
+/* a foto aparece inteira (nada é cortado); o que sobrar dos lados é preenchido com a própria foto desfocada */
+.slide::before, .th.fill::before { content: ""; position: absolute; inset: -24px; background: var(--img) center / cover; filter: blur(16px) brightness(.55); }
+.strip .slide img { position: relative; width: 100%; height: 100%; object-fit: contain; }
 .ph {
   height: 100%; display: grid; place-items: center; align-content: center; gap: 8px; text-align: center;
   color: var(--silver-3); font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase;

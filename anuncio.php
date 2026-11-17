@@ -11,7 +11,7 @@ header('Content-Type: text/html; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');   // preço/situação mudam: nunca servir cópia velha
 header('X-Content-Type-Options: nosniff');
 
-const VER = '20261113a';   // mude junto com os ?v= das outras páginas quando alterar .css/.js
+const VER = '20261117a';   // mude junto com os ?v= das outras páginas quando alterar .css/.js
 
 function h($v): string { return htmlspecialchars((string) $v, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
 function reais($n): string { $n = (float) $n; return 'R$ ' . number_format($n, fmod($n, 1.0) != 0.0 ? 2 : 0, ',', '.'); }

@@ -35,7 +35,8 @@
       : (it.finalidade === 'Aluguel' ? '<span class="badge">Aluguel</span>' : '');
     if (it.fotos && it.fotos.length) {
       var imgs = it.fotos.map(function (f, i) {
-        return '<img src="' + esc(f) + '" alt="' + esc(titulo(it)) + ' — foto ' + (i + 1) + '" loading="lazy">';
+        var u = f + (f.indexOf('?') < 0 ? '?' : '&') + 'w=800';
+        return '<div class="slide" style="--img:url(&quot;' + esc(u) + '&quot;)"><img src="' + esc(u) + '" alt="' + esc(titulo(it)) + ' — foto ' + (i + 1) + '" loading="lazy"></div>';
       }).join('');
       var setas = it.fotos.length > 1
         ? '<button class="nav-btn prev" type="button" aria-label="Foto anterior">' + CHEV_L + '</button>' +

@@ -128,10 +128,11 @@
       var sub = tipo === 'veiculos'
         ? it.ano + ' · ' + milhar(it.km) + ' km · ' + it.cambio
         : it.tipo + ' · ' + (it.bairro ? it.bairro + ', ' : '') + it.cidade + ' · ' + it.finalidade;
-      var foto = it.fotosUrl && it.fotosUrl[0] ? '<img src="' + esc(it.fotosUrl[0]) + '" alt="" loading="lazy">' : 'sem foto';
+      var capa = it.fotosUrl && it.fotosUrl[0] ? it.fotosUrl[0] + '&w=400' : '';
+      var foto = capa ? '<img src="' + esc(capa) + '" alt="" loading="lazy">' : 'sem foto';
       var pill = it.status && it.status !== 'disponivel' ? '<span class="pill ' + esc(it.status) + '">' + esc(rotuloStatus(it.status)) + '</span>' : '';
       return '<button type="button" class="item ' + esc(it.status || '') + '" data-id="' + esc(it.id) + '">' +
-        '<span class="th">' + foto + '</span>' +
+        '<span class="th' + (capa ? ' fill' : '') + '"' + (capa ? ' style="--img:url(&quot;' + esc(capa) + '&quot;)"' : '') + '>' + foto + '</span>' +
         '<span><span class="t">' + esc(nome) + pill + '</span><span class="s" style="display:block">' + esc(sub) + '</span><span class="p metal" style="display:block">' + brl(it.preco) + (it.finalidade === 'Aluguel' ? ' /mês' : '') + '</span></span>' +
         '</button>';
     }).join('');
